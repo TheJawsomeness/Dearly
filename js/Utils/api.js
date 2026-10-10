@@ -1,4 +1,3 @@
-
 import { SUPABASE_URL, SUPABASE_KEY } from "../config/supabase.js";
 
 export async function fetchFromSupabase(table, query) {
