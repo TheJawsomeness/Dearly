@@ -1,11 +1,13 @@
-
 import { fetchFromSupabase } from "../utils/api.js";
 
-export async function getSiteSettings() {
+export async function getSiteSettings(column,row =0) {
     const settings = await fetchFromSupabase(
         "site_settings",
-        "select=logo_url"
+        column,
+        row
     );
 
-    return settings[0];
+    console.log(settings);
+
+    return settings;
 }

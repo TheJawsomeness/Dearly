@@ -1,17 +1,14 @@
-import { SUPABASE_URL, SUPABASE_KEY } from "../config/supabase.js";
+import { supabase } from "../config/supabase.js";
 
-export async function fetchFromSupabase(table, query) {
-    const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+export async function fetchFromSupabase(table,columns = "*",row = 0) {
+    const { data, error } = await supabase
+        .from(table)
+        .select(columns);
 
-    const response = await fetch(url, {
-        headers: {
-            apikey: SUPABASE_KEY
-        }
-    });
-
-    if (!response.ok) {
-        throw new Error(`Supabase request failed: ${response.status}`);
+    if (error) {
+        throw error;
     }
 
-    return await response.json();
+    return data[row][columns];
 }
+
