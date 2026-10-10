@@ -7,5 +7,23 @@
 </head>
 <body>
     Hi-ah. This is a project!
+
+    <img id="logo" width="200">
+
+    <script>
+        const URL = "https://orwbogsqoefxfdyomjuy.supabase.co";
+        const Key = "sb_publishable_xUEC--0ITmr4J7ZTI28K3A_x3YBTkPe";
+
+        fetch(`${URL}/rest/v1/site_settings?select=logo_url`, {
+            headers: {
+                apikey: Key
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("logo").src = data[0].logo_url;
+        });
+    </script>
+
 </body>
 </html>
