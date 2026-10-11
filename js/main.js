@@ -1,6 +1,7 @@
 
 import { getSiteSettings } from "./services/settingsService.js";
-import { getCounter, incrementCounter } from "./services/counterService.js";
+
+import { getCounter, incrementCounter, listenToCounter } from "./services/counterService.js";
 
 async function loadLogo() {
     try {
@@ -28,10 +29,13 @@ incrementButton.addEventListener("click", async () => {
 
     try{
         const newCount = await incrementCounter();
-        counterDisplay.textContent = newCount
     } catch (error) {
         console.error("Failed to increment", error);
     } finally {
         incrementButton.disabled = false;
     }
 });
+
+listenToCounter((count) => {
+    counterDisplay.textContent = count;
+})

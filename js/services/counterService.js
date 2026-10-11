@@ -1,4 +1,5 @@
 import { fetchFromSupabase, updateToSupabase } from "../utils/api.js";
+import { supabase } from "../config/supabase.js";
 
 const table = "click_counter";
 const column = "count";
@@ -15,22 +16,30 @@ export async function getCounter() {
     return settings[row][column];
 }
 
-export async function setCounter(value) {
-    const id = 1;
-    const settings = await updateToSupabase(
-        table,
-        {[column]:value},
-        {id:id}
-    );
+export async function incrementCounter() {
+    const { data, error } = await supabase.rpc("increment_counter");
 
-    return settings;
+    if (error) throw error;
+
+    console.log("RPC data:", data);
+    return data;
 }
 
-export async function incrementCounter() {
-    const currentCount = await getCounter();
-    const newCount = currentCount + 1;
 
-    await setCounter(newCount);
-    
-    return newCount;
+export function listenToCounter(callback) {
+    return supabase
+        .channel("counter-changes")
+        .on(
+            "postgres_changes",
+            {
+                event: "UPDATE",
+                schema: "public",
+                table: "click_counter",
+                filter: "id=eq.1"
+            },
+            (payload) => {
+                callback(payload.new.count);
+            }
+        )
+        .subscribe();
 }
