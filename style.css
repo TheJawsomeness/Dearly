@@ -1,0 +1,37 @@
+:root {
+    --bg: rgb(225, 247, 255);
+    --text: #008178;
+    --diffcolor: #16165c;
+    --darkercolor: #0a0a23;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+h1 {
+    color: var(--text);
+    margin-top: 20px;
+    font-size: 4em;
+}
+
+h2{
+    color: var(--diffcolor);
+    margin-top: 20px;
+    font-size: 2em;
+}
+
+button:hover {
+    background-color: var(--darkercolor);
+    color: var(--bg);
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.95);
+}
