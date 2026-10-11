@@ -32,6 +32,13 @@ h2{
     color: var(--diffcolor);
     margin-top: 20px;
     font-size: 2em;
+    transition: text-shadow 0.2s;
+}
+
+h2:hover{
+    text-shadow:
+        2px 2px 0 var(--diffcolor),
+        4px 4px 0 var(--darkercolor);
 }
 
 button:hover {
