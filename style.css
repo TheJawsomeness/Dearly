@@ -19,6 +19,13 @@ h1 {
     margin-top: 20px;
     font-size: 4em;
     font-family: 'IBM Plex Sans', sans-serif;
+    transition: text-shadow 0.2s;
+}
+
+h1:hover {
+    text-shadow:
+        4px 4px 0 var(--diffcolor),
+        8px 8px 0 var(--darkercolor);
 }
 
 h2{
