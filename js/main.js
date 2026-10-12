@@ -4,6 +4,9 @@ import { signUp, logIn, logOut, getCurrentUser } from "./services/authService.js
 
 import { getCounter, incrementCounter, listenToCounter } from "./services/counterService.js";
 
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./../css/style.css";
+
 async function loadLogo() {
     try {
         const longlogo = await getSiteSettings("long_logo_url");
@@ -41,9 +44,12 @@ listenToCounter((count) => {
     counterDisplay.textContent = count;
 })
 
-const signupForm = document.querySelector("#signup-form");
-const loginForm = document.querySelector("#login-form");
+const authForm = document.querySelector("#auth-form");
+const emailInput = document.querySelector("#email-input");
+const passwordInput = document.querySelector("#password-input");
+
 const authMessage = document.querySelector("#auth-message");
+const authMessageDiv = document.querySelector("#auth-message-div");
 const accountSection = document.querySelector("#account-section");
 const userEmail = document.querySelector("#user-email");
 const logoutButton = document.querySelector("#logout-button");
@@ -54,50 +60,48 @@ function showUser(user) {
     accountSection.hidden = !loggedIn;
     userEmail.textContent = loggedIn ? user.email : "";
 
-    signupForm.hidden = loggedIn;
-    loginForm.hidden = loggedIn;
+    authForm.hidden = loggedIn;
 
     incrementButton.hidden = !loggedIn;
 }
 
-signupForm.addEventListener("submit", async (event) => {
+authForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const email = document.querySelector("#signup-email").value;
-    const password = document.querySelector("#signup-password").value;
+    const email = emailInput.value;
+    const password = passwordInput.value;
 
-    try {
-        const data = await signUp(email, password);
+    const action = event.submitter.value;
 
-        if (data.session) {
+    if(action == "login"){
+       try{
+            const data = await logIn(email,password);
+
             showUser(data.user);
-            authMessage.textContent = "Account created and logged in!";
-        } else {
-            authMessage.textContent =
-                "Account created! Check your email to confirm it, then log in.";
+            authMessage.textContent = "Logged in successfully";
+        }catch(error){
+            authMessage.textContent = error.message;
         }
+    }else if(action == "signup"){
+        try {
+            const data = await signUp(email, password);
 
-        signupForm.reset();
-    } catch (error) {
-        authMessage.textContent = error.message;
+            if (data.session) {
+                showUser(data.user);
+                authMessage.textContent = "Account created and logged in!";
+            } else {
+                authMessage.textContent =
+                    "Account created! Check your email to confirm it, then log in.";
+            }
+
+            authForm.reset();
+        } catch (error) {
+            authMessage.textContent = error.message;
+        }
     }
+   
 });
 
-loginForm.addEventListener("submit", async(event) => {
-    event.preventDefault();
-
-    const email = document.querySelector("#login-email").value;
-    const password = document.querySelector("#login-password").value;
-
-    try{
-        const data = await logIn(email,password);
-
-        showUser(data.user);
-        authMessage.textContent = "Logged in successfully";
-    }catch(error){
-        authMessage.textContent = error.message;
-    }
-});
 
 logoutButton.addEventListener("click", async () => {
     try {
