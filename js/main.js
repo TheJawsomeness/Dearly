@@ -1,5 +1,6 @@
 
 import { getSiteSettings } from "./services/settingsService.js";
+import { signUp, logIn, logOut, getCurrentUser } from "./services/authService.js";
 
 import { getCounter, incrementCounter, listenToCounter } from "./services/counterService.js";
 
@@ -39,3 +40,83 @@ incrementButton.addEventListener("click", async () => {
 listenToCounter((count) => {
     counterDisplay.textContent = count;
 })
+
+const signupForm = document.querySelector("#signup-form");
+const loginForm = document.querySelector("#login-form");
+const authMessage = document.querySelector("#auth-message");
+const accountSection = document.querySelector("#account-section");
+const userEmail = document.querySelector("#user-email");
+const logoutButton = document.querySelector("#logout-button");
+
+function showUser(user) {
+    const loggedIn = Boolean(user);
+
+    accountSection.hidden = !loggedIn;
+    userEmail.textContent = loggedIn ? user.email : "";
+
+    signupForm.hidden = loggedIn;
+    loginForm.hidden = loggedIn;
+
+    incrementButton.hidden = !loggedIn;
+}
+
+signupForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const email = document.querySelector("#signup-email").value;
+    const password = document.querySelector("#signup-password").value;
+
+    try {
+        const data = await signUp(email, password);
+
+        if (data.session) {
+            showUser(data.user);
+            authMessage.textContent = "Account created and logged in!";
+        } else {
+            authMessage.textContent =
+                "Account created! Check your email to confirm it, then log in.";
+        }
+
+        signupForm.reset();
+    } catch (error) {
+        authMessage.textContent = error.message;
+    }
+});
+
+loginForm.addEventListener("submit", async(event) => {
+    event.preventDefault();
+
+    const email = document.querySelector("#login-email").value;
+    const password = document.querySelector("#login-password").value;
+
+    try{
+        const data = await logIn(email,password);
+
+        showUser(data.user);
+        authMessage.textContent = "Logged in successfully";
+    }catch(error){
+        authMessage.textContent = error.message;
+    }
+});
+
+logoutButton.addEventListener("click", async () => {
+    try {
+        await logOut();
+        showUser(null);
+        authMessage.textContent = "You have logged out.";
+    } catch (error) {
+        authMessage.textContent = error.message;
+    }
+});
+
+async function checkSession() {
+    try {
+        const user = await getCurrentUser();
+        showUser(user);
+    } catch (error) {
+        console.error("Could not check session:", error);
+        showUser(null);
+    }
+}
+
+checkSession();

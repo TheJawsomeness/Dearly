@@ -5,6 +5,11 @@
     --darkercolor: #0a0a23;
 }
 
+#account-section {
+    width: fit-content;
+    height: auto;
+}
+
 body {
     background-color: var(--bg);
     color: var(--text);
