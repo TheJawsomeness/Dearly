@@ -1,74 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-    <img id="logo" width="200" alt="Website logo">
-    <h1>Hi-ah. This is a project! Amazing.</h1>
-    Now with npm and Vite!
-
-    <script type="module" src="./js/main.js"></script>
-
-    <hr>
-    <h2> Click Counter </h2>
-    <p>Count: <span id="counter"> Loading...</span></p>
-
-    <button id="increment-button"> Click me!</button>
-    
-    <hr>
-    <section id="auth-section">
-    <h2>Dearly Account</h2>
-
-
-    
-    <!-- Sign up -->
-    <form id="auth-form">
-        <div class="form-group">
-            <h3>Create an account</h3>
-            <div class="container px-3 py-2">
-                <input
-                type="email"
-                id="email-input"
-                placeholder="Email"
-                required
-                class="form-control"
-                />
-
-                 <input
-                type="password"
-                id="password-input"
-                placeholder="Password (at least 6 characters)"
-                minlength="6"
-                required
-                class="form-control"
-                />
-            </div>
-            
-
-           
-
-            <div class="d-flex gap-2 justify-content-center py-3">
-                <button class="btn btn-primary" value="login">Log In</button>
-                <button class="btn btn-outline-primary" value="signup">Sign Up</button>
-            </div>
-        </div>
-    </form>
-
-    <p id="auth-message" class="alert alert-info" role="alert"></p>
-
-   <!-- Visible after login -->
-    <!-- Visible after login -->
-    <div id="account-section" class="text-center w-100" hidden>
-        <p id="user-email" class="mb-3"></p>
-        <button id="logout-button" class="btn btn-primary">Log Out</button>
-    </div>
-    </section>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dearly-js</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
