@@ -27,7 +27,7 @@ export async function incrementCounter() {
 
 
 export function listenToCounter(callback) {
-    return supabase
+    const channel = supabase
         .channel("counter-changes")
         .on(
             "postgres_changes",
@@ -42,4 +42,8 @@ export function listenToCounter(callback) {
             }
         )
         .subscribe();
+
+    return () => {
+        void supabase.removeChannel(channel);
+    }
 }
