@@ -14,7 +14,7 @@ export default function Logo({ onClick }: { onClick: () => void }) {
           />
         </svg>
       </span>
-      <span>dearly</span>
+      <span>Dearly</span>
     </button>
   );
 }

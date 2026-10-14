@@ -109,7 +109,7 @@ export default function App() {
 
     // 2. Subscribe to database changes
     const channel = supabase
-      .channel("posts-realtime")
+      .channel("user_counts-realtime")
       .on(
         "postgres_changes",
         {
@@ -237,20 +237,6 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    async function loadPosts() {
-      try {
-        const posts = await getPosts();
-        setPosts(posts);
-      } catch (error) {
-        console.error("Couldnt load Posts:");
-        setAlertMessage("Couldnt load posts ${error}");
-      }
-    }
-
-    loadPosts();
-  }, []);
-
   function navigate(next: View) {
     setView(next);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -271,8 +257,18 @@ export default function App() {
     setAlertMessage("You’ve been logged out.");
   }
 
-  function post(text: string) {
-    createPost(text);
+  async function post(text: string) {
+    try {
+      await createPost(text);
+
+      const updatedPosts = await getPosts();
+      setPosts(updatedPosts);
+
+      setAlertMessage("Your message has been posted!");
+    } catch (error) {
+      console.error("Failed to create post:", error);
+      setAlertMessage("Could not create your post.");
+    }
   }
 
   async function react(id: number, nextReaction: Exclude<Reaction, null>) {
