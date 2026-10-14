@@ -966,6 +966,10 @@ input::placeholder {
   animation: toast-in 250ms ease-out;
 }
 
+.bottom {
+  padding-top: 16px;
+}
+
 .toast-check {
   width: 25px;
   height: 25px;

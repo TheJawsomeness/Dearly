@@ -11,10 +11,12 @@ export default function AuthPage({
   mode,
   navigate,
   authenticate,
+  count,
 }: {
   mode: "login" | "register";
   navigate: (view: View) => void;
   authenticate: (user: User) => void;
+  count: number;
 }) {
   const isRegister = mode === "register";
   const [name, setName] = useState("");
@@ -103,13 +105,13 @@ export default function AuthPage({
           people around you.
         </p>
         <div className="community-note">
-          <div className="avatar-stack" aria-hidden="true">
+          {/* <div className="avatar-stack" aria-hidden="true">
             <span className="avatar coral">MC</span>
             <span className="avatar sky">OB</span>
             <span className="avatar violet">PS</span>
-          </div>
+          </div> */}
           <span>
-            <strong>1,248 neighbors</strong> are already on dearly
+            <strong>{count} neighbors</strong> are already on dearly
           </span>
         </div>
       </section>

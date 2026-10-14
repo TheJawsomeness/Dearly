@@ -24,7 +24,7 @@ export default function Composer({
   }
 
   return (
-    <section className="composer-card">
+    <section className="composer-card pt-3">
       <div className="composer-top">
         <span className="avatar avatar-small teal">
           {user

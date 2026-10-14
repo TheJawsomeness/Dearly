@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Message, Reaction, View } from "./const/types";
-import { Post } from "../backend/services/postService";
+import { Post, Vote } from "../backend/services/postService";
 import Composer from "./composter";
 import GuestPrompt from "./guestPrompt";
 import MessageSkeleton from "./MessageSkeleton";
@@ -15,6 +15,8 @@ export default function Board({
   onPost,
   onReact,
   loading,
+  votes,
+  count,
 }: {
   user: string | null;
   posts: Post[] | null;
@@ -22,6 +24,8 @@ export default function Board({
   onPost: (text: string) => void;
   onReact: (id: number, reaction: Exclude<Reaction, null>) => void;
   loading: boolean;
+  votes: Vote[] | null;
+  count: number;
 }) {
   const [search, setSearch] = useState("");
 
@@ -46,17 +50,33 @@ export default function Board({
           <p>Updates, questions, and good things worth sharing.</p>
         </div>
         <div className="board-stat" aria-label="Community activity">
-          <span className="stat-avatars">
+          {/* <span className="stat-avatars">
             <span className="avatar coral">MC</span>
             <span className="avatar sky">OB</span>
             <span className="avatar violet">PS</span>
-          </span>
+          </span> */}
           <span>
-            <strong>42 neighbors</strong>
-            active today
+            <strong>{count}</strong>
+            Total Members
           </span>
         </div>
       </section>
+
+      <div className="feed-toolbar">
+        <div>
+          <h2 id="feed-title">Latest messages</h2>
+          <p>{posts ? posts.length : 0} conversations from your community</p>
+        </div>
+        <label className="search">
+          <Icon name="search" />
+          <span className="sr-only">Search messages</span>
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search messages"
+          />
+        </label>
+      </div>
 
       {user ? (
         <Composer user={user} onPost={onPost} />
@@ -65,22 +85,6 @@ export default function Board({
       )}
 
       <section className="feed" aria-labelledby="feed-title">
-        <div className="feed-toolbar">
-          <div>
-            <h2 id="feed-title">Latest messages</h2>
-            <p>{posts ? posts.length : 0} conversations from your community</p>
-          </div>
-          <label className="search">
-            <Icon name="search" />
-            <span className="sr-only">Search messages</span>
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search messages"
-            />
-          </label>
-        </div>
-
         <div className="message-list" aria-live="polite" aria-busy={loading}>
           {loading ? (
             <>
@@ -89,14 +93,20 @@ export default function Board({
               <MessageSkeleton />
             </>
           ) : filtered.length ? (
-            filtered.map((post) => (
-              <MessageCard
-                key={post.id}
-                post={post}
-                loggedIn={Boolean(user)}
-                onReact={onReact}
-              />
-            ))
+            filtered.map((post) => {
+              const vote =
+                votes?.find((vote) => vote.post_id === post.id) ?? null;
+
+              return (
+                <MessageCard
+                  key={post.id}
+                  post={post}
+                  vote={vote}
+                  loggedIn={Boolean(user)}
+                  onReact={onReact}
+                />
+              );
+            })
           ) : (
             <div className="empty-state">
               <span className="empty-icon">

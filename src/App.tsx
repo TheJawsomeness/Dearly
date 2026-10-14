@@ -15,7 +15,16 @@ import Icon from "./components/icon";
 import AlertMessage from "./components/alertMessage";
 import { User } from "@supabase/supabase-js";
 import { getProfileNameByUUID } from "./backend/services/profileServices";
-import { getPosts, Post } from "./backend/services/postService";
+import {
+  createPost,
+  getMyVotes,
+  getPosts,
+  Post,
+  reactOnPost,
+  Vote,
+} from "./backend/services/postService";
+import { supabase } from "./backend/config/supabase";
+import { getCount } from "./backend/services/countService";
 
 const icons: Record<string, ReactNode> = {
   arrow: (
@@ -83,6 +92,114 @@ export default function App() {
   const [alertMessage, setAlertMessage] = useState("");
   const [userData, setUserData] = useState<User | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [votes, setVotes] = useState<Vote[] | null>(null);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    async function loadCount() {
+      try {
+        const data = await getCount();
+        setCount(data);
+      } catch (error) {
+        console.error("Could not load Count");
+      }
+    }
+
+    loadCount();
+
+    // 2. Subscribe to database changes
+    const channel = supabase
+      .channel("posts-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_counts",
+        },
+        (payload) => {
+          loadCount();
+        },
+      )
+      .subscribe((status, error) => {
+        if (error) {
+          console.error("REALTIME ERROR:", error);
+        }
+      });
+
+    // 3. Clean up when the component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadVotes() {
+      if (!userData) {
+        setVotes([]);
+        return;
+      }
+
+      try {
+        const data = await getMyVotes();
+
+        if (!cancelled) {
+          setVotes(data);
+        }
+      } catch (error) {
+        console.error("Could not get votes:", error);
+      }
+    }
+
+    loadVotes();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userData]);
+
+  useEffect(() => {
+    async function loadPosts() {
+      try {
+        const data = await getPosts();
+        setPosts(data);
+      } catch (error) {
+        console.error("Failed to load posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // 1. Fetch posts when the app loads
+    loadPosts();
+
+    // 2. Subscribe to database changes
+    const channel = supabase
+      .channel("posts-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "posts",
+        },
+        (payload) => {
+          loadPosts();
+        },
+      )
+      .subscribe((status, error) => {
+        if (error) {
+          console.error("REALTIME ERROR:", error);
+        }
+      });
+
+    // 3. Clean up when the component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   useEffect(() => {
     if (!userData) {
@@ -155,55 +272,30 @@ export default function App() {
   }
 
   function post(text: string) {
-    // const displayName = userName || "Neighbor";
-    // setMessages((current) => [
-    //   {
-    //     id: Date.now(),
-    //     author: displayName,
-    //     initials: displayName
-    //       .split(" ")
-    //       .map((part) => part[0])
-    //       .join("")
-    //       .slice(0, 2),
-    //     text,
-    //     time: "Just now",
-    //     likes: 0,
-    //     dislikes: 0,
-    //     reaction: null,
-    //     tone: "teal",
-    //   },
-    //   ...current,
-    // ]);
-    // setAlertMessage("Your message is live!");
+    createPost(text);
   }
 
-  function react(id: number, nextReaction: Exclude<Reaction, null>) {
-    // if (!userName) return;
-    // let selected = false;
-    // setMessages((current) =>
-    //   current.map((message) => {
-    //     if (message.id !== id) return message;
-    //     const previous = message.reaction;
-    //     selected = previous !== nextReaction;
-    //     return {
-    //       ...message,
-    //       likes:
-    //         message.likes +
-    //         (previous === "like" ? -1 : 0) +
-    //         (nextReaction === "like" && previous !== "like" ? 1 : 0),
-    //       dislikes:
-    //         message.dislikes +
-    //         (previous === "dislike" ? -1 : 0) +
-    //         (nextReaction === "dislike" && previous !== "dislike" ? 1 : 0),
-    //       reaction: previous === nextReaction ? null : nextReaction,
-    //     };
-    //   }),
-    // );
-    // setAlertMessage(
-    //   nextReaction === "like"
-    //     ? "You liked this message."
-    //     : "You disliked this message.",
-    // );
+  async function react(id: number, nextReaction: Exclude<Reaction, null>) {
+    try {
+      const stillReacting = await reactOnPost(id, nextReaction);
+
+      // Refresh the votes from Supabase
+      const updatedVotes = await getMyVotes();
+      setVotes(updatedVotes);
+
+      if (!stillReacting) {
+        setAlertMessage("Your vote has been removed.");
+      } else {
+        setAlertMessage(
+          nextReaction === "like"
+            ? "You liked this message."
+            : "You disliked this message.",
+        );
+      }
+    } catch (error) {
+      console.error("Failed to update vote:", error);
+      setAlertMessage("Could not update your vote. Please try again.");
+    }
   }
 
   return (
@@ -229,9 +321,16 @@ export default function App() {
           onPost={post}
           onReact={react}
           loading={loading}
+          votes={votes}
+          count={count}
         />
       ) : (
-        <AuthPage mode={view} navigate={navigate} authenticate={authenticate} />
+        <AuthPage
+          mode={view}
+          navigate={navigate}
+          authenticate={authenticate}
+          count={count}
+        />
       )}
     </div>
   );
