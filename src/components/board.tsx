@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Message, Reaction, View } from "./const/types";
+import { Post } from "../backend/services/postService";
 import Composer from "./composter";
 import GuestPrompt from "./guestPrompt";
 import MessageSkeleton from "./MessageSkeleton";
@@ -9,28 +10,29 @@ import Button from "./button";
 
 export default function Board({
   user,
-  messages,
+  posts,
   navigate,
   onPost,
   onReact,
   loading,
 }: {
   user: string | null;
-  messages: Message[];
+  posts: Post[] | null;
   navigate: (view: View) => void;
   onPost: (text: string) => void;
   onReact: (id: number, reaction: Exclude<Reaction, null>) => void;
   loading: boolean;
 }) {
   const [search, setSearch] = useState("");
+
   const filtered = useMemo(
     () =>
-      messages.filter((message) =>
-        `${message.author} ${message.text}`
+      (posts ?? []).filter((post) =>
+        `${post.content} ${post.author ?? ""}`
           .toLowerCase()
           .includes(search.toLowerCase()),
       ),
-    [messages, search],
+    [posts, search],
   );
 
   return (
@@ -66,7 +68,7 @@ export default function Board({
         <div className="feed-toolbar">
           <div>
             <h2 id="feed-title">Latest messages</h2>
-            <p>{messages.length} conversations from your community</p>
+            <p>{posts ? posts.length : 0} conversations from your community</p>
           </div>
           <label className="search">
             <Icon name="search" />
@@ -87,10 +89,10 @@ export default function Board({
               <MessageSkeleton />
             </>
           ) : filtered.length ? (
-            filtered.map((message) => (
+            filtered.map((post) => (
               <MessageCard
-                key={message.id}
-                message={message}
+                key={post.id}
+                post={post}
                 loggedIn={Boolean(user)}
                 onReact={onReact}
               />

@@ -1,46 +1,54 @@
+import { Post } from "../backend/services/postService";
+import { getProfileNameByUUID } from "../backend/services/profileServices";
 import { Message, Reaction } from "./const/types";
 import Icon from "./icon";
+import { useEffect, useState } from "react";
+
+const tone = "teal";
 
 export default function MessageCard({
-  message,
-  loggedIn,
+  post,
   onReact,
+  loggedIn,
 }: {
-  message: Message;
-  loggedIn: boolean;
+  post: Post;
   onReact: (id: number, reaction: Exclude<Reaction, null>) => void;
+  loggedIn: boolean;
 }) {
   return (
     <article className="message-card">
       <div className="message-head">
-        <span className={`avatar ${message.tone}`}>{message.initials}</span>
+        <span className="avatar">{post.author.charAt(0).toUpperCase()}</span>
+
         <div>
-          <h3>{message.author}</h3>
-          <time>{message.time}</time>
+          <h3>{post.author}</h3>
+          <time>{new Date(post.created_at).toLocaleString()}</time>
         </div>
       </div>
-      <p className="message-text">{message.text}</p>
+
+      <p className="message-text">{post.content}</p>
+
       <div className="reaction-row">
         <button
-          className={`reaction like ${message.reaction === "like" ? "selected" : ""}`}
-          onClick={() => onReact(message.id, "like")}
+          className="reaction like"
+          onClick={() => onReact(post.id, "like")}
           disabled={!loggedIn}
-          aria-label={`${message.likes} likes${!loggedIn ? ", log in to react" : ""}`}
-          aria-pressed={message.reaction === "like"}
+          aria-label={`${post.likes} likes${!loggedIn ? ", log in to react" : ""}`}
         >
           <Icon name="thumbUp" />
-          <span>{message.likes}</span>
+          <span>{post.likes}</span>
         </button>
+
         <button
-          className={`reaction dislike ${message.reaction === "dislike" ? "selected" : ""}`}
-          onClick={() => onReact(message.id, "dislike")}
+          className="reaction dislike"
+          onClick={() => onReact(post.id, "dislike")}
           disabled={!loggedIn}
-          aria-label={`${message.dislikes} dislikes${!loggedIn ? ", log in to react" : ""}`}
-          aria-pressed={message.reaction === "dislike"}
+          aria-label={`${post.dislikes} dislikes${!loggedIn ? ", log in to react" : ""}`}
         >
           <Icon name="thumbDown" />
-          <span>{message.dislikes}</span>
+          <span>{post.dislikes}</span>
         </button>
+
         {!loggedIn && <span className="reaction-hint">Log in to react</span>}
       </div>
     </article>

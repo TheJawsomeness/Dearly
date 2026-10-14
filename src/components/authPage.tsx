@@ -65,7 +65,7 @@ export default function AuthPage({
     } else if (isRegister) {
       setBusy(true);
       try {
-        const authData = await signUp(email, password);
+        const authData = await signUp(email, password, name);
         if (!authData.session) {
           showAlert(
             "Sign Up Successful. Check Email for Confirmation.",
@@ -145,12 +145,12 @@ export default function AuthPage({
         <form onSubmit={submit} noValidate>
           {isRegister && (
             <label className="field">
-              <span>Name</span>
+              <span>Username</span>
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 autoComplete="name"
-                placeholder="Your full name"
+                placeholder="Your Nickname"
               />
             </label>
           )}

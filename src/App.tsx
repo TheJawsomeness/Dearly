@@ -14,6 +14,8 @@ import AuthPage from "./components/authPage";
 import Icon from "./components/icon";
 import AlertMessage from "./components/alertMessage";
 import { User } from "@supabase/supabase-js";
+import { getProfileNameByUUID } from "./backend/services/profileServices";
+import { getPosts, Post } from "./backend/services/postService";
 
 const icons: Record<string, ReactNode> = {
   arrow: (
@@ -73,23 +75,63 @@ const icons: Record<string, ReactNode> = {
   ),
 };
 
-function GetName(user: User | null) {
-  return user?.email?.split("@")[0] ?? null;
-}
-
 export default function App() {
   const [view, setView] = useState<View>("board");
-  const [messages, setMessages] = useState(starterMessages);
+  const [posts, setPosts] = useState<Post[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [userData, setUserData] = useState<User | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
 
-  const userName = GetName(userData);
+  useEffect(() => {
+    if (!userData) {
+      setUserName(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadName() {
+      try {
+        const name = await getProfileNameByUUID(userData!.id);
+
+        if (!cancelled) {
+          setUserName(name);
+        }
+      } catch (error) {
+        console.error("Failed to load profile name:", error);
+
+        if (!cancelled) {
+          setUserName(null);
+        }
+      }
+    }
+
+    loadName();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userData]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setLoading(false), 650);
     return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    async function loadPosts() {
+      try {
+        const posts = await getPosts();
+        setPosts(posts);
+      } catch (error) {
+        console.error("Couldnt load Posts:");
+        setAlertMessage("Couldnt load posts ${error}");
+      }
+    }
+
+    loadPosts();
   }, []);
 
   function navigate(next: View) {
@@ -100,73 +142,68 @@ export default function App() {
   function authenticate(authenticatedUser: User) {
     setUserData(authenticatedUser);
     setView("board");
-    const name = GetName(userData);
-    setAlertMessage(
-      `Welcome${name ? `, ${name.split(" ")[0]}` : ""}! You’re now logged in.`,
-    );
+    setAlertMessage("Welcome! You’re now logged in.");
   }
 
   function logout() {
     setUserData(null);
     setView("board");
-    setMessages((current) =>
-      current.map((message) => ({ ...message, reaction: null })),
-    );
+    // setMessages((current) =>
+    //   current.map((message) => ({ ...message, reaction: null })),
+    // );
     setAlertMessage("You’ve been logged out.");
   }
 
   function post(text: string) {
-    const displayName = userName || "Neighbor";
-    setMessages((current) => [
-      {
-        id: Date.now(),
-        author: displayName,
-        initials: displayName
-          .split(" ")
-          .map((part) => part[0])
-          .join("")
-          .slice(0, 2),
-        text,
-        time: "Just now",
-        likes: 0,
-        dislikes: 0,
-        reaction: null,
-        tone: "teal",
-      },
-      ...current,
-    ]);
-    setAlertMessage("Your message is live!");
+    // const displayName = userName || "Neighbor";
+    // setMessages((current) => [
+    //   {
+    //     id: Date.now(),
+    //     author: displayName,
+    //     initials: displayName
+    //       .split(" ")
+    //       .map((part) => part[0])
+    //       .join("")
+    //       .slice(0, 2),
+    //     text,
+    //     time: "Just now",
+    //     likes: 0,
+    //     dislikes: 0,
+    //     reaction: null,
+    //     tone: "teal",
+    //   },
+    //   ...current,
+    // ]);
+    // setAlertMessage("Your message is live!");
   }
 
   function react(id: number, nextReaction: Exclude<Reaction, null>) {
-    if (!userName) return;
-    let selected = false;
-    setMessages((current) =>
-      current.map((message) => {
-        if (message.id !== id) return message;
-        const previous = message.reaction;
-        selected = previous !== nextReaction;
-        return {
-          ...message,
-          likes:
-            message.likes +
-            (previous === "like" ? -1 : 0) +
-            (nextReaction === "like" && previous !== "like" ? 1 : 0),
-          dislikes:
-            message.dislikes +
-            (previous === "dislike" ? -1 : 0) +
-            (nextReaction === "dislike" && previous !== "dislike" ? 1 : 0),
-          reaction: previous === nextReaction ? null : nextReaction,
-        };
-      }),
-    );
-    setAlertMessage(
-      selected
-        ? nextReaction === "like"
-          ? "You liked this message."
-          : "You disliked this message."
-        : "Your reaction was removed.",
-    );
+    // if (!userName) return;
+    // let selected = false;
+    // setMessages((current) =>
+    //   current.map((message) => {
+    //     if (message.id !== id) return message;
+    //     const previous = message.reaction;
+    //     selected = previous !== nextReaction;
+    //     return {
+    //       ...message,
+    //       likes:
+    //         message.likes +
+    //         (previous === "like" ? -1 : 0) +
+    //         (nextReaction === "like" && previous !== "like" ? 1 : 0),
+    //       dislikes:
+    //         message.dislikes +
+    //         (previous === "dislike" ? -1 : 0) +
+    //         (nextReaction === "dislike" && previous !== "dislike" ? 1 : 0),
+    //       reaction: previous === nextReaction ? null : nextReaction,
+    //     };
+    //   }),
+    // );
+    // setAlertMessage(
+    //   nextReaction === "like"
+    //     ? "You liked this message."
+    //     : "You disliked this message.",
+    // );
   }
 
   return (
@@ -187,7 +224,7 @@ export default function App() {
       {view === "board" ? (
         <Board
           user={userName}
-          messages={messages}
+          posts={posts}
           navigate={navigate}
           onPost={post}
           onReact={react}
