@@ -46,8 +46,8 @@ export default function Composer({
           aria-label="Write a message"
         />
         <div className="composer-actions">
-          <span className={text.length > 450 ? "count warning" : "count"}>
-            {text.length}/500
+          <span className={text.length > 750 ? "count warning" : "count"}>
+            {text.length}/1024
           </span>
           <Button type="submit" disabled={!text.trim() || posting}>
             {posting ? (

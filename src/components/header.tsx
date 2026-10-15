@@ -30,7 +30,9 @@ export default function Header({
           {user ? (
             <>
               <div className="user-chip">
-                <span className="avatar avatar-small">MC</span>
+                <span className="avatar avatar-small">
+                  {user.charAt(0).toUpperCase()}
+                </span>
                 <span className="user-name">{user}</span>
               </div>
               <Button variant="secondary" onClick={logout}>
