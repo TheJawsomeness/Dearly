@@ -1,4 +1,5 @@
 import { supabase } from "../backend/config/supabase";
+import Button from "./button";
 /// <reference types="vite/client" />
 
 export default function GoogleLoginButton() {
@@ -16,15 +17,17 @@ export default function GoogleLoginButton() {
   }
 
   return (
-    <button
+    <Button
       type="button"
-      className="google-login-button"
+      variant="secondary"
+      className="submit-button"
+      disabled={false}
       onClick={signInWithGoogle}
     >
       <span className="google-g" aria-hidden="true">
         G
       </span>
       Sign in with Google
-    </button>
+    </Button>
   );
 }
