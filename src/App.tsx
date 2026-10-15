@@ -331,7 +331,6 @@ export default function App() {
           onClose={() => setAlertMessage("")}
         />
       </div>
-
       {view === "board" ? (
         <Board
           user={userName}
@@ -351,6 +350,11 @@ export default function App() {
           count={count}
         />
       )}
+      <footer className="text-center justify-content-center">
+        <a href={`${import.meta.env.BASE_URL}privacy.html`}>Privacy Policy</a>
+        {" · "}
+        <a href={`${import.meta.env.BASE_URL}terms.html`}>Terms of Service</a>
+      </footer>
     </div>
   );
 }
