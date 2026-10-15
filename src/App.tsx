@@ -25,6 +25,7 @@ import {
 } from "./backend/services/postService";
 import { supabase } from "./backend/config/supabase";
 import { getCount } from "./backend/services/countService";
+import { logOut } from "./backend/services/authService";
 
 const icons: Record<string, ReactNode> = {
   arrow: (
@@ -94,6 +95,27 @@ export default function App() {
   const [userName, setUserName] = useState<string | null>(null);
   const [votes, setVotes] = useState<Vote[] | null>(null);
   const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // Get the current session when the app loads.
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) {
+        console.error(error.message);
+        return;
+      }
+
+      setUserData(data.session?.user ?? null);
+    });
+
+    // Listen for future login/logout changes.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserData(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     async function loadCount() {
@@ -248,12 +270,13 @@ export default function App() {
     setAlertMessage("Welcome! You’re now logged in.");
   }
 
-  function logout() {
+  function handlelogout() {
     setUserData(null);
     setView("board");
     // setMessages((current) =>
     //   current.map((message) => ({ ...message, reaction: null })),
     // );
+    logOut();
     setAlertMessage("You’ve been logged out.");
   }
 
@@ -301,7 +324,7 @@ export default function App() {
           user={userName}
           view={view}
           navigate={navigate}
-          logout={logout}
+          logout={handlelogout}
         />
         <AlertMessage
           message={alertMessage}

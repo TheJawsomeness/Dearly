@@ -1173,6 +1173,33 @@ input::placeholder {
     right: 14px;
     bottom: 14px;
   }
+
+
+  .google-login-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    background: #fff;
+    color: #1f1f1f;
+    border: 1px solid #747775;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .google-login-button:hover {
+    background: #f7f7f7;
+  }
+
+  .google-login-button:focus-visible {
+    outline: 2px solid #a94235;
+    outline-offset: 3px;
+  }
+
 }
 
 @media (prefers-reduced-motion: reduce) {

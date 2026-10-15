@@ -6,6 +6,7 @@ import Icon from "./icon";
 import { View } from "./const/types";
 import { logIn, signUp } from "../backend/services/authService";
 import { User } from "@supabase/supabase-js";
+import GoogleLoginButton from "./googleLoginButton";
 
 export default function AuthPage({
   mode,
@@ -212,6 +213,7 @@ export default function AuthPage({
               </>
             )}
           </Button>
+          <GoogleLoginButton></GoogleLoginButton>
         </form>
         <p className="auth-switch">
           {isRegister ? "Already have an account?" : "New to dearly?"}{" "}

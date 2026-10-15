@@ -1,3 +1,4 @@
+import { User } from "@supabase/supabase-js";
 import { supabase } from "../config/supabase";
 
 export async function getProfiles() {
