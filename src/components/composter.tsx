@@ -41,7 +41,7 @@ export default function Composer({
       <form onSubmit={submit}>
         <textarea
           value={text}
-          onChange={(event) => setText(event.target.value.slice(0, 500))}
+          onChange={(event) => setText(event.target.value.slice(0, 1024))}
           placeholder="What would you like your neighbors to know?"
           aria-label="Write a message"
         />
